@@ -80,9 +80,18 @@ export default function CheckInForm() {
     setPassengers((prev) => prev.filter((_, i) => i !== index));
   }
 
+  function handleBoatChange(newBoatId: string) {
+    setBoatId(newBoatId);
+    const boat = getBoatById(newBoatId);
+    if (boat && passengers.length > boat.maxCapacity) {
+      setPassengers((prev) => prev.slice(0, boat.maxCapacity));
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit || !selectedBoat) return;
+    const boat = getBoatById(boatId);
+    if (!canSubmit || !boat) return;
 
     setIsSubmitting(true);
     setStatusMessage(null);
@@ -95,8 +104,8 @@ export default function CheckInForm() {
 
     try {
       await addDoc(collection(db, "despachos_diarios"), {
-        boatId: selectedBoat.id,
-        boatName: selectedBoat.name,
+        boatId: boat.id,
+        boatName: boat.name,
         departureDate,
         passengers: manifestPassengers,
         locale,
@@ -120,7 +129,7 @@ export default function CheckInForm() {
     try {
       const pdfDoc = generateManifestPdf({
         locale,
-        boatName: selectedBoat.name,
+        boatName: boat.name,
         departureDate,
         passengers: manifestPassengers,
       });
@@ -132,8 +141,8 @@ export default function CheckInForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           locale,
-          boatId: selectedBoat.id,
-          boatName: selectedBoat.name,
+          boatId: boat.id,
+          boatName: boat.name,
           departureDate,
           passengers: manifestPassengers,
           pdfBase64,
@@ -189,7 +198,7 @@ export default function CheckInForm() {
                   id="boat"
                   required
                   value={boatId}
-                  onChange={(e) => setBoatId(e.target.value)}
+                  onChange={(e) => handleBoatChange(e.target.value)}
                   className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-200 focus:outline-none"
                 >
                   <option value="">{t.selectBoatPlaceholder}</option>
@@ -199,6 +208,11 @@ export default function CheckInForm() {
                     </option>
                   ))}
                 </select>
+                {selectedBoat && (
+                  <p className="mt-2 text-sm font-medium text-slate-800">
+                    ✓ {selectedBoat.name}
+                  </p>
+                )}
               </div>
 
               <DepartureDatePicker

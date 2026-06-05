@@ -59,19 +59,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { boatName, departureDate, passengers, pdfBase64 } = payload as {
-      boatName: string;
-      departureDate: string;
-      passengers: Array<{
-        fullName: string;
-        documentType: string;
-        documentNumber: string;
-      }>;
-      pdfBase64: string;
-      locale: Locale;
-    };
+    const { boat } = validation;
+    const boatName = boat.name;
+    const boatId = String(payload.boatId ?? "");
 
     const locale = payload.locale as Locale;
+    const departureDate = String(payload.departureDate ?? "");
+    const passengers = payload.passengers as Array<{
+      fullName: string;
+      documentType: string;
+      documentNumber: string;
+    }>;
+    const pdfBase64 = String(payload.pdfBase64 ?? "");
     const t = translations[locale] ?? translations.es;
     const plainTextList = buildPlainTextPassengerList(locale, passengers);
 
@@ -98,7 +97,7 @@ export async function POST(request: NextRequest) {
     `;
 
     const { error } = await resend.emails.send({
-      from: fromEmail,
+      from: fromEmail.replace(/Náutica/g, "Nautica"),
       to: recipients,
       subject: `${t.emailSubject} — ${boatName} (${departureDate})`,
       html: htmlBody,
