@@ -47,8 +47,7 @@ service cloud.firestore {
         && request.resource.data.passengers is list
         && request.resource.data.passengers.size() > 0
         && request.resource.data.passengers.size() <= maxCapacity(request.resource.data.boatId)
-        && isValidLocale(request.resource.data.locale)
-        && request.resource.data.createdAt == request.time;
+        && isValidLocale(request.resource.data.locale);
 
       allow read, update, delete: if false;
     }

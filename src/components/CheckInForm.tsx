@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { FirebaseError } from "firebase/app";
 import Header from "./Header";
 import DepartureDatePicker from "./DepartureDatePicker";
 import { BOATS, getBoatById } from "@/lib/boats";
@@ -102,7 +103,21 @@ export default function CheckInForm() {
         gdprConsentAccepted: true,
         createdAt: serverTimestamp(),
       });
+    } catch (err) {
+      console.error("Firestore error:", err);
+      if (err instanceof FirebaseError && err.code === "permission-denied") {
+        setStatusMessage({
+          type: "error",
+          text: `${t.submitError} (permisos Firestore — revisa las reglas)`,
+        });
+      } else {
+        setStatusMessage({ type: "error", text: t.submitError });
+      }
+      setIsSubmitting(false);
+      return;
+    }
 
+    try {
       const pdfDoc = generateManifestPdf({
         locale,
         boatName: selectedBoat.name,
@@ -126,6 +141,8 @@ export default function CheckInForm() {
       });
 
       if (!emailResponse.ok) {
+        const detail = await emailResponse.json().catch(() => null);
+        console.error("Email API error:", emailResponse.status, detail);
         throw new Error("Email API failed");
       }
 
@@ -134,8 +151,12 @@ export default function CheckInForm() {
       setDepartureDate("");
       setPassengers([{ ...EMPTY_PASSENGER }]);
       setGdprAccepted(false);
-    } catch {
-      setStatusMessage({ type: "error", text: t.submitError });
+    } catch (err) {
+      console.error("Email error:", err);
+      setStatusMessage({
+        type: "error",
+        text: "Datos guardados, pero falló el envío del email. Inténtalo de nuevo.",
+      });
     } finally {
       setIsSubmitting(false);
     }
