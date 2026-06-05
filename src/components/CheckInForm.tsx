@@ -7,7 +7,6 @@ import DepartureDatePicker from "./DepartureDatePicker";
 import { BOATS, getBoatById } from "@/lib/boats";
 import { db } from "@/lib/firebase";
 import {
-  buildPlainTextPassengerList,
   generateManifestPdf,
   pdfToBase64,
 } from "@/lib/generatePdf";
@@ -112,20 +111,16 @@ export default function CheckInForm() {
       });
 
       const pdfBase64 = pdfToBase64(pdfDoc);
-      const plainTextList = buildPlainTextPassengerList(
-        locale,
-        manifestPassengers,
-      );
 
       const emailResponse = await fetch("/api/send-manifest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           locale,
+          boatId: selectedBoat.id,
           boatName: selectedBoat.name,
           departureDate,
           passengers: manifestPassengers,
-          plainTextList,
           pdfBase64,
         }),
       });

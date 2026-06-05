@@ -2,16 +2,59 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function isValidLocale(locale) {
+      return locale in ['es', 'en', 'fr', 'de', 'it', 'pt'];
+    }
+
+    function isValidBoatId(boatId) {
+      return boatId in [
+        'saxdor-400-gts-cabin',
+        'saver-330wa',
+        'saver-750'
+      ];
+    }
+
+    function maxCapacity(boatId) {
+      return boatId == 'saver-750' ? 7 : 11;
+    }
+
+    function isValidDate(date) {
+      return date is string
+        && date.size() == 10
+        && date.matches('^\\d{4}-\\d{2}-\\d{2}$');
+    }
+
+    function hasOnlyAllowedFields() {
+      return request.resource.data.keys().hasOnly([
+        'boatId',
+        'boatName',
+        'departureDate',
+        'passengers',
+        'locale',
+        'gdprConsentAccepted',
+        'createdAt'
+      ]);
+    }
+
     match /despachos_diarios/{docId} {
-      // Formulario público: solo permitir crear registros con consentimiento RGPD
-      allow create: if request.resource.data.gdprConsentAccepted == true
-        && request.resource.data.boatId is string
+      allow create: if hasOnlyAllowedFields()
+        && request.resource.data.gdprConsentAccepted == true
+        && isValidBoatId(request.resource.data.boatId)
         && request.resource.data.boatName is string
-        && request.resource.data.departureDate is string
+        && request.resource.data.boatName.size() <= 80
+        && isValidDate(request.resource.data.departureDate)
         && request.resource.data.passengers is list
-        && request.resource.data.locale is string;
+        && request.resource.data.passengers.size() > 0
+        && request.resource.data.passengers.size() <= maxCapacity(request.resource.data.boatId)
+        && isValidLocale(request.resource.data.locale)
+        && request.resource.data.createdAt == request.time;
 
       allow read, update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
