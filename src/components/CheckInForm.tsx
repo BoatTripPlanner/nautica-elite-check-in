@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import Header from "./Header";
+import DepartureDatePicker from "./DepartureDatePicker";
 import { BOATS, getBoatById } from "@/lib/boats";
 import { db } from "@/lib/firebase";
 import {
@@ -10,7 +11,7 @@ import {
   generateManifestPdf,
   pdfToBase64,
 } from "@/lib/generatePdf";
-import { translations } from "@/lib/translations";
+import { localeToHtmlLang, translations } from "@/lib/translations";
 import type { DocumentType, Locale, Passenger } from "@/lib/types";
 
 const EMPTY_PASSENGER: Passenger = {
@@ -42,6 +43,10 @@ export default function CheckInForm() {
   } | null>(null);
 
   const t = translations[locale];
+
+  useEffect(() => {
+    document.documentElement.lang = localeToHtmlLang(locale);
+  }, [locale]);
 
   const selectedBoat = useMemo(() => getBoatById(boatId), [boatId]);
   const maxCapacity = selectedBoat?.maxCapacity ?? Infinity;
@@ -180,22 +185,14 @@ export default function CheckInForm() {
                 </select>
               </div>
 
-              <div>
-                <label
-                  htmlFor="departure-date"
-                  className="mb-1.5 block text-sm font-medium text-slate-700"
-                >
-                  {t.departureDate} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="departure-date"
-                  type="date"
-                  required
-                  value={departureDate}
-                  onChange={(e) => setDepartureDate(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-200 focus:outline-none"
-                />
-              </div>
+              <DepartureDatePicker
+                id="departure-date"
+                label={t.departureDate}
+                value={departureDate}
+                onChange={setDepartureDate}
+                locale={locale}
+                required
+              />
             </div>
           </section>
 

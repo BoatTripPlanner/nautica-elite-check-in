@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { LOCALES, LOCALE_LABELS } from "@/lib/translations";
 import type { Locale } from "@/lib/types";
 
@@ -8,37 +9,95 @@ interface LanguageSelectorProps {
   onChange: (locale: Locale) => void;
 }
 
-const LOCALE_FLAGS: Record<Locale, string> = {
-  es: "🇪🇸",
-  en: "🇬🇧",
-  fr: "🇫🇷",
-  de: "🇩🇪",
-  it: "🇮🇹",
-  pt: "🇵🇹",
+const LOCALE_FLAG_CODES: Record<Locale, string> = {
+  es: "es",
+  en: "gb",
+  fr: "fr",
+  de: "de",
+  it: "it",
+  pt: "pt",
 };
+
+function FlagIcon({ code, className = "" }: { code: string; className?: string }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`https://flagcdn.com/w40/${code}.png`}
+      width={20}
+      height={15}
+      alt=""
+      className={`inline-block rounded-sm object-cover shadow-sm ${className}`}
+      loading="lazy"
+    />
+  );
+}
 
 export default function LanguageSelector({
   locale,
   onChange,
 }: LanguageSelectorProps) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="relative">
-      <select
-        id="language-selector"
-        value={locale}
-        onChange={(e) => onChange(e.target.value as Locale)}
-        className="cursor-pointer appearance-none rounded-lg border border-white/20 bg-white/10 py-2 pr-8 pl-3 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20 focus:border-white/40 focus:ring-2 focus:ring-white/30 focus:outline-none"
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
         aria-label="Select language"
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/20 bg-white/10 py-2 pr-3 pl-2.5 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20 focus:border-white/40 focus:ring-2 focus:ring-white/30 focus:outline-none"
       >
-        {LOCALES.map((loc) => (
-          <option key={loc} value={loc} className="bg-slate-900 text-white">
-            {LOCALE_FLAGS[loc]} {LOCALE_LABELS[loc]}
-          </option>
-        ))}
-      </select>
-      <span className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs text-white/70">
-        ▼
-      </span>
+        <FlagIcon code={LOCALE_FLAG_CODES[locale]} />
+        <span>{LOCALE_LABELS[locale]}</span>
+        <span className="text-[10px] text-white/60" aria-hidden="true">
+          ▼
+        </span>
+      </button>
+
+      {open && (
+        <ul
+          role="listbox"
+          aria-label="Languages"
+          className="absolute right-0 z-30 mt-1 min-w-[7rem] overflow-hidden rounded-lg border border-slate-700 bg-slate-900 py-1 shadow-xl"
+        >
+          {LOCALES.map((loc) => (
+            <li key={loc} role="presentation">
+              <button
+                type="button"
+                role="option"
+                aria-selected={locale === loc}
+                onClick={() => {
+                  onChange(loc);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center gap-2.5 px-3 py-2 text-sm transition hover:bg-white/10 ${
+                  locale === loc
+                    ? "bg-white/10 font-semibold text-white"
+                    : "text-slate-200"
+                }`}
+              >
+                <FlagIcon code={LOCALE_FLAG_CODES[loc]} />
+                <span>{LOCALE_LABELS[loc]}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

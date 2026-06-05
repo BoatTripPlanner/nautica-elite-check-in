@@ -1,0 +1,125 @@
+.departure-picker {
+  --rdp-accent-color: #0f172a;
+  --rdp-accent-background-color: #f1f5f9;
+  --rdp-day-height: 2.25rem;
+  --rdp-day-width: 2.25rem;
+  --rdp-nav_button-width: 2rem;
+  --rdp-nav_button-height: 2rem;
+  --rdp-nav-height: 2.5rem;
+}
+
+.departure-picker .rdp-month {
+  width: 100%;
+}
+
+.departure-picker .rdp-month_caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.departure-picker .rdp-dropdowns {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.departure-picker .rdp-dropdown_root {
+  position: relative;
+}
+
+.departure-picker .rdp-dropdown {
+  appearance: none;
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background-color: #fff;
+  padding: 0.375rem 1.75rem 0.375rem 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.25rem;
+}
+
+.departure-picker .rdp-dropdown:focus {
+  outline: 2px solid #cbd5e1;
+  outline-offset: 1px;
+}
+
+.departure-picker .rdp-dropdown_root .rdp-chevron {
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  width: 0.875rem;
+  height: 0.875rem;
+  transform: translateY(-50%);
+  fill: #64748b;
+}
+
+.departure-picker .rdp-button_previous,
+.departure-picker .rdp-button_next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #475569;
+}
+
+.departure-picker .rdp-button_previous:hover:not(:disabled),
+.departure-picker .rdp-button_next:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.departure-picker .rdp-button_previous .rdp-chevron,
+.departure-picker .rdp-button_next .rdp-chevron {
+  width: 1rem;
+  height: 1rem;
+  fill: #475569;
+}
+
+.departure-picker .rdp-weekdays {
+  margin-bottom: 0.25rem;
+}
+
+.departure-picker .rdp-weekday {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.departure-picker .rdp-day_button {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.departure-picker .rdp-day_button:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.departure-picker .rdp-selected .rdp-day_button {
+  border: none;
+  background: #0f172a;
+  color: #fff;
+}
+
+.departure-picker .rdp-today:not(.rdp-outside) .rdp-day_button {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.departure-picker .rdp-disabled .rdp-day_button {
+  color: #cbd5e1;
+  opacity: 1;
+}

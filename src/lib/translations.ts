@@ -278,3 +278,16 @@ export function getDocumentTypeLabel(
   };
   return map[type] ?? type;
 }
+
+/** BCP47 tags with Monday as first day of week (en-GB, not en-US). */
+export function localeToHtmlLang(locale: Locale): string {
+  const map: Record<Locale, string> = {
+    es: "es-ES",
+    en: "en-GB",
+    fr: "fr-FR",
+    de: "de-DE",
+    it: "it-IT",
+    pt: "pt-PT",
+  };
+  return map[locale];
+}
