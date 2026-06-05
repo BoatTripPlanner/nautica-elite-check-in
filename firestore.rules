@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /despachos_diarios/{docId} {
+      // Formulario público: solo permitir crear registros con consentimiento RGPD
+      allow create: if request.resource.data.gdprConsentAccepted == true
+        && request.resource.data.boatId is string
+        && request.resource.data.boatName is string
+        && request.resource.data.departureDate is string
+        && request.resource.data.passengers is list
+        && request.resource.data.locale is string;
+
+      allow read, update, delete: if false;
+    }
+  }
+}
