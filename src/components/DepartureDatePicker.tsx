@@ -18,6 +18,9 @@ const DATE_FNS_LOCALES = {
   pt,
 } as const;
 
+const selectClassName =
+  "w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm font-medium text-slate-900 capitalize focus:border-slate-500 focus:ring-2 focus:ring-slate-200 focus:outline-none";
+
 interface DepartureDatePickerProps {
   id: string;
   label: string;
@@ -60,6 +63,7 @@ export default function DepartureDatePicker({
   const containerRef = useRef<HTMLDivElement>(null);
   const listboxId = useId();
   const htmlLang = localeToHtmlLang(locale);
+  const dateLocale = DATE_FNS_LOCALES[locale];
 
   const today = useMemo(() => {
     const d = new Date();
@@ -75,8 +79,31 @@ export default function DepartureDatePicker({
 
   const selected = value ? parseISO(value) : undefined;
   const displayValue = selected
-    ? format(selected, "P", { locale: DATE_FNS_LOCALES[locale] })
+    ? format(selected, "P", { locale: dateLocale })
     : "";
+
+  const [calendarMonth, setCalendarMonth] = useState<Date>(selected ?? today);
+
+  const monthOptions = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, index) => ({
+        value: index,
+        label: format(new Date(2024, index, 1), "LLLL", { locale: dateLocale }),
+      })),
+    [dateLocale],
+  );
+
+  const yearOptions = useMemo(() => {
+    const startYear = today.getFullYear();
+    const endYear = endMonth.getFullYear();
+    return Array.from({ length: endYear - startYear + 1 }, (_, index) => startYear + index);
+  }, [today, endMonth]);
+
+  useEffect(() => {
+    if (open) {
+      setCalendarMonth(selected ?? today);
+    }
+  }, [open, selected, today]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -90,6 +117,16 @@ export default function DepartureDatePicker({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  function handleMonthSelect(monthIndex: number) {
+    setCalendarMonth(
+      new Date(calendarMonth.getFullYear(), monthIndex, 1),
+    );
+  }
+
+  function handleYearSelect(year: number) {
+    setCalendarMonth(new Date(year, calendarMonth.getMonth(), 1));
+  }
 
   return (
     <div ref={containerRef} className="relative" lang={htmlLang}>
@@ -125,12 +162,40 @@ export default function DepartureDatePicker({
           id={listboxId}
           role="dialog"
           aria-label={label}
-          className="absolute z-20 mt-2 w-[min(100vw-2rem,20rem)] rounded-xl border border-slate-200 bg-white p-4 shadow-lg sm:w-80"
+          className="departure-picker-popover absolute z-30 mt-2 w-[min(100vw-2rem,18rem)] rounded-xl border border-slate-200 bg-white p-3 shadow-xl sm:w-full sm:max-w-none"
         >
+          <div className="mb-3 grid grid-cols-2 gap-2">
+            <select
+              aria-label="Month"
+              value={calendarMonth.getMonth()}
+              onChange={(e) => handleMonthSelect(Number(e.target.value))}
+              className={selectClassName}
+            >
+              {monthOptions.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
+            <select
+              aria-label="Year"
+              value={calendarMonth.getFullYear()}
+              onChange={(e) => handleYearSelect(Number(e.target.value))}
+              className={selectClassName}
+            >
+              {yearOptions.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <DayPicker
             mode="single"
             selected={selected}
-            defaultMonth={selected ?? today}
+            month={calendarMonth}
+            onMonthChange={setCalendarMonth}
             startMonth={today}
             endMonth={endMonth}
             onSelect={(date) => {
@@ -139,15 +204,13 @@ export default function DepartureDatePicker({
                 setOpen(false);
               }
             }}
-            locale={DATE_FNS_LOCALES[locale]}
+            locale={dateLocale}
             weekStartsOn={1}
-            captionLayout="dropdown"
-            navLayout="around"
+            hideNavigation
+            components={{ MonthCaption: () => <></> }}
             disabled={{ before: today }}
             classNames={{
               root: "departure-picker text-sm",
-              month_caption: "w-full",
-              dropdowns: "gap-2",
               weekdays: "border-b border-slate-100 pb-2",
             }}
           />
