@@ -53,20 +53,29 @@ export default function LanguageSelector({
   }, []);
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative shrink-0">
       <button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label="Select language"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/20 bg-white/10 py-2 pr-3 pl-2.5 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20 focus:border-white/40 focus:ring-2 focus:ring-white/30 focus:outline-none"
+        className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 py-2 pr-2.5 pl-2.5 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20 focus:border-white/40 focus:ring-2 focus:ring-white/30 focus:outline-none sm:gap-2 sm:pr-3"
       >
-        <FlagIcon code={LOCALE_FLAG_CODES[locale]} />
-        <span>{LOCALE_LABELS[locale]}</span>
-        <span className="text-[10px] text-white/60" aria-hidden="true">
-          ▼
-        </span>
+        <FlagIcon code={LOCALE_FLAG_CODES[locale]} className="shrink-0" />
+        <span className="leading-none">{LOCALE_LABELS[locale]}</span>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className={`h-4 w-4 shrink-0 text-white/60 transition-transform ${open ? "rotate-180" : ""}`}
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+            clipRule="evenodd"
+          />
+        </svg>
       </button>
 
       {open && (

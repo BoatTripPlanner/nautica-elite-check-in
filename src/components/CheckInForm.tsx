@@ -128,7 +128,7 @@ export default function CheckInForm() {
 
     try {
       const pdfDoc = generateManifestPdf({
-        locale,
+        locale: "es",
         boatName: boat.name,
         departureDate,
         passengers: manifestPassengers,

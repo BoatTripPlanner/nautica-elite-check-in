@@ -3,7 +3,6 @@ import { Resend } from "resend";
 import { translations } from "@/lib/translations";
 import { escapeHtml, validateManifestPayload } from "@/lib/validation";
 import { buildPlainTextPassengerList } from "@/lib/generatePdf";
-import type { Locale } from "@/lib/types";
 
 const MAX_BODY_BYTES = 5 * 1024 * 1024;
 
@@ -63,7 +62,6 @@ export async function POST(request: NextRequest) {
     const boatName = boat.name;
     const boatId = String(payload.boatId ?? "");
 
-    const locale = payload.locale as Locale;
     const departureDate = String(payload.departureDate ?? "");
     const passengers = payload.passengers as Array<{
       fullName: string;
@@ -71,8 +69,8 @@ export async function POST(request: NextRequest) {
       documentNumber: string;
     }>;
     const pdfBase64 = String(payload.pdfBase64 ?? "");
-    const t = translations[locale] ?? translations.es;
-    const plainTextList = buildPlainTextPassengerList(locale, passengers);
+    const t = translations.es;
+    const plainTextList = buildPlainTextPassengerList("es", passengers);
 
     const resend = new Resend(apiKey);
     const recipients = officeEmail
